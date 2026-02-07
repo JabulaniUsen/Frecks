@@ -1,0 +1,143 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap");
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Design system with custom color palette */
+
+@layer base {
+  :root {
+    --background: 44 67% 93%;
+    --foreground: 0 0% 13%;
+
+    --card: 43 62% 91%;
+    --card-foreground: 0 0% 13%;
+
+    --popover: 44 67% 93%;
+    --popover-foreground: 0 0% 13%;
+
+    --primary: 28 96% 52%;
+    --primary-foreground: 44 67% 96%;
+
+    --secondary: 0 0% 13%;
+    --secondary-foreground: 44 67% 93%;
+
+    --muted: 43 40% 85%;
+    --muted-foreground: 0 0% 35%;
+
+    --accent: 43 62% 87%;
+    --accent-foreground: 0 0% 13%;
+
+    --destructive: 0 72% 50%;
+    --destructive-foreground: 44 67% 96%;
+
+    --border: 43 40% 80%;
+    --input: 43 40% 80%;
+    --ring: 28 96% 52%;
+
+    --radius: 1rem;
+
+    --sidebar-background: 43 62% 91%;
+    --sidebar-foreground: 0 0% 13%;
+    --sidebar-primary: 28 96% 52%;
+    --sidebar-primary-foreground: 44 67% 96%;
+    --sidebar-accent: 43 62% 87%;
+    --sidebar-accent-foreground: 0 0% 13%;
+    --sidebar-border: 43 40% 80%;
+    --sidebar-ring: 28 96% 52%;
+
+    --chart-1: 28 96% 52%;
+    --chart-2: 43 62% 60%;
+    --chart-3: 0 0% 13%;
+    --chart-4: 180 60% 45%;
+    --chart-5: 120 50% 45%;
+
+    --font-sans: 'Poppins', ui-sans-serif, system-ui, sans-serif;
+
+    --shadow-card: 0 4px 20px hsl(0 0% 0% / 0.08);
+    --shadow-card-hover: 0 12px 32px hsl(0 0% 0% / 0.12);
+    --shadow-button: 0 4px 14px hsl(28 96% 52% / 0.3);
+  }
+
+  .dark {
+    --background: 0 0% 13%;
+    --foreground: 44 67% 93%;
+
+    --card: 0 0% 18%;
+    --card-foreground: 44 67% 93%;
+
+    --popover: 0 0% 18%;
+    --popover-foreground: 44 67% 93%;
+
+    --primary: 28 96% 52%;
+    --primary-foreground: 0 0% 13%;
+
+    --secondary: 43 62% 87%;
+    --secondary-foreground: 0 0% 13%;
+
+    --muted: 0 0% 25%;
+    --muted-foreground: 43 40% 70%;
+
+    --accent: 0 0% 22%;
+    --accent-foreground: 44 67% 93%;
+
+    --destructive: 0 72% 55%;
+    --destructive-foreground: 44 67% 96%;
+
+    --border: 0 0% 25%;
+    --input: 0 0% 25%;
+    --ring: 28 96% 52%;
+
+    --sidebar-background: 0 0% 15%;
+    --sidebar-foreground: 44 67% 93%;
+    --sidebar-primary: 28 96% 52%;
+    --sidebar-primary-foreground: 0 0% 13%;
+    --sidebar-accent: 0 0% 22%;
+    --sidebar-accent-foreground: 44 67% 93%;
+    --sidebar-border: 0 0% 25%;
+    --sidebar-ring: 28 96% 52%;
+
+    --chart-1: 28 96% 58%;
+    --chart-2: 43 62% 65%;
+    --chart-3: 44 67% 93%;
+    --chart-4: 180 60% 50%;
+    --chart-5: 120 50% 50%;
+
+    --shadow-card: 0 4px 20px hsl(0 0% 0% / 0.3);
+    --shadow-card-hover: 0 12px 32px hsl(0 0% 0% / 0.4);
+    --shadow-button: 0 4px 14px hsl(28 96% 52% / 0.4);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+}
+
+@layer utilities {
+  .shadow-card {
+    box-shadow: var(--shadow-card);
+  }
+  
+  .shadow-card-hover {
+    box-shadow: var(--shadow-card-hover);
+  }
+  
+  .shadow-button {
+    box-shadow: var(--shadow-button);
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}

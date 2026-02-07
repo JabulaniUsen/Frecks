@@ -1,0 +1,1 @@
+self.__REACT_LOADABLE_MANIFEST='{"lib/paystack.ts -> @/lib/supabase":{"id":6573,"files":[]}}';
