@@ -61,10 +61,10 @@ const FeaturedEvents = () => {
       <div className="container mx-auto px-4">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-12">
           <div>
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+            <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold mb-4">
               Trending <span className="text-primary">Events</span> 🔥
             </h2>
-            <p className="text-muted-foreground max-w-md">
+            <p className="text-sm md:text-base text-muted-foreground max-w-md">
               Don't miss out! These are the hottest events happening on campus this month.
             </p>
           </div>
