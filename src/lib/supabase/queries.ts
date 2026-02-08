@@ -20,11 +20,12 @@ export const getFilteredEvents = async (filters: {
   location?: string
   dateFrom?: string
   dateTo?: string
+  school?: string
 }) => {
   const now = new Date().toISOString()
   let query = supabase
     .from('events')
-    .select('*, ticket_types(*)')
+    .select('*, ticket_types(*), creator:users!events_creator_id_fkey(school)')
     .eq('status', 'active')
     .gte('date', now) // Only get events that haven't passed
 
@@ -57,7 +58,17 @@ export const getFilteredEvents = async (filters: {
   const { data, error } = await query
 
   if (error) throw error
-  return data
+
+  // Apply school filter after fetching (since Supabase doesn't support nested filtering easily)
+  let filteredData = data || []
+  if (filters.school && filters.school !== 'all') {
+    filteredData = filteredData.filter((event: any) => {
+      const creator = event.creator as any
+      return creator?.school === filters.school
+    })
+  }
+
+  return filteredData
 }
 
 export const getPastEvents = async () => {
@@ -251,5 +262,182 @@ export const getWalletTransactions = async (creatorId: string) => {
 
   if (error) throw error
   return data
+}
+
+// Admin queries
+export const getAllEvents = async () => {
+  const { data, error } = await supabase
+    .from('events')
+    .select('*, ticket_types(*), creator:users!events_creator_id_fkey(id, email, full_name, school)')
+    .order('created_at', { ascending: false })
+
+  if (error) throw error
+  return data || []
+}
+
+export const getAllUsers = async () => {
+  const { data, error } = await supabase
+    .from('users')
+    .select('*')
+    .order('created_at', { ascending: false })
+
+  if (error) throw error
+  return data || []
+}
+
+export const getAllOrders = async () => {
+  const { data, error } = await supabase
+    .from('orders')
+    .select('*, event:events(id, title, creator:users!events_creator_id_fkey(id, email, full_name)), user:users(id, email, full_name)')
+    .order('created_at', { ascending: false })
+
+  if (error) throw error
+  return data || []
+}
+
+export const getAllTickets = async () => {
+  const { data, error } = await supabase
+    .from('tickets')
+    .select('*, event:events(id, title), ticket_type:ticket_types(id, name, price, is_free), user:users(id, email, full_name), order:orders(id, payment_status)')
+    .order('created_at', { ascending: false })
+
+  if (error) {
+    console.error('Error fetching all tickets:', error)
+    throw error
+  }
+  return data || []
+}
+
+export const getAllOrganizers = async () => {
+  const { data, error } = await supabase
+    .from('users')
+    .select('*, creator_profile:creator_profiles(*)')
+    .eq('role', 'creator')
+    .order('created_at', { ascending: false })
+
+  if (error) throw error
+  return data || []
+}
+
+export const getRevenueByEvent = async () => {
+  const { data: orders, error } = await supabase
+    .from('orders')
+    .select('event_id, total_amount, payment_status, event:events(id, title)')
+    .eq('payment_status', 'paid')
+
+  if (error) throw error
+
+  // Group by event_id and calculate total revenue
+  const revenueMap = new Map<string, { eventId: string; eventTitle: string; revenue: number }>()
+  
+  orders?.forEach((order: any) => {
+    const eventId = order.event_id
+    const eventTitle = order.event?.title || 'Unknown Event'
+    const current = revenueMap.get(eventId) || { eventId, eventTitle, revenue: 0 }
+    current.revenue += parseFloat(order.total_amount || 0)
+    revenueMap.set(eventId, current)
+  })
+
+  return Array.from(revenueMap.values()).sort((a, b) => b.revenue - a.revenue)
+}
+
+export const getAdminStats = async () => {
+  // Get all events count by status
+  const { data: events, error: eventsError } = await supabase
+    .from('events')
+    .select('status')
+
+  if (eventsError) throw eventsError
+
+  const eventsByStatus = {
+    active: 0,
+    draft: 0,
+    completed: 0,
+    cancelled: 0,
+  }
+
+  events?.forEach((event: any) => {
+    if (event.status in eventsByStatus) {
+      eventsByStatus[event.status as keyof typeof eventsByStatus]++
+    }
+  })
+
+  // Get all users count by role
+  const { data: users, error: usersError } = await supabase
+    .from('users')
+    .select('role, banned')
+
+  if (usersError) throw usersError
+
+  const usersByRole = {
+    user: 0,
+    creator: 0,
+    admin: 0,
+  }
+  let bannedUsers = 0
+
+  users?.forEach((user: any) => {
+    if (user.role in usersByRole) {
+      usersByRole[user.role as keyof typeof usersByRole]++
+    }
+    if (user.banned) bannedUsers++
+  })
+
+  // Get total revenue (all paid orders)
+  const { data: paidOrders, error: ordersError } = await supabase
+    .from('orders')
+    .select('total_amount, created_at')
+    .eq('payment_status', 'paid')
+
+  if (ordersError) throw ordersError
+
+  const totalRevenue = paidOrders?.reduce((sum, order) => sum + parseFloat(order.total_amount || 0), 0) || 0
+
+  // Get this month's revenue
+  const now = new Date()
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
+  const thisMonthRevenue = paidOrders?.filter(order => order.created_at >= startOfMonth)
+    .reduce((sum, order) => sum + parseFloat(order.total_amount || 0), 0) || 0
+
+  // Get total tickets sold
+  const { data: tickets, error: ticketsError } = await supabase
+    .from('tickets')
+    .select('id')
+
+  if (ticketsError) throw ticketsError
+
+  const totalTicketsSold = tickets?.length || 0
+
+  // Get active organizers count
+  const { data: organizers, error: organizersError } = await supabase
+    .from('users')
+    .select('id')
+    .eq('role', 'creator')
+
+  if (organizersError) throw organizersError
+
+  const activeOrganizers = organizers?.length || 0
+
+  return {
+    events: {
+      total: events?.length || 0,
+      byStatus: eventsByStatus,
+    },
+    users: {
+      total: users?.length || 0,
+      byRole: usersByRole,
+      banned: bannedUsers,
+    },
+    revenue: {
+      total: totalRevenue,
+      thisMonth: thisMonthRevenue,
+    },
+    tickets: {
+      totalSold: totalTicketsSold,
+    },
+    organizers: {
+      active: activeOrganizers,
+    },
+  }
 }
 

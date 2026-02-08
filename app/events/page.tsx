@@ -12,8 +12,23 @@ import { Badge } from '@/components/ui/badge'
 import { Search, Calendar, MapPin, X, Filter, Music, Trophy, PartyPopper, Mic2, Film, GraduationCap, Wrench, Sparkles } from 'lucide-react'
 import { format } from 'date-fns'
 import { cn } from '@/lib/utils'
+import { nigerianSchools } from '@/data/nigerian-schools'
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover'
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command'
+import { Check, ChevronsUpDown } from 'lucide-react'
 
 const categories = [
   { label: 'All', value: 'all', icon: Sparkles },
@@ -36,18 +51,21 @@ function EventsContent() {
   const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '')
   const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || 'all')
   const [locationFilter, setLocationFilter] = useState(searchParams.get('location') || '')
+  const [selectedSchool, setSelectedSchool] = useState(searchParams.get('school') || 'all')
   const [dateFrom, setDateFrom] = useState(searchParams.get('dateFrom') || '')
   const [dateTo, setDateTo] = useState(searchParams.get('dateTo') || '')
   const [showFilters, setShowFilters] = useState(false)
+  const [schoolOpen, setSchoolOpen] = useState(false)
 
   // Build filters object
   const filters = useMemo(() => ({
     search: searchQuery || undefined,
     category: selectedCategory !== 'all' ? selectedCategory : undefined,
     location: locationFilter || undefined,
+    school: selectedSchool !== 'all' ? selectedSchool : undefined,
     dateFrom: dateFrom || undefined,
     dateTo: dateTo || undefined,
-  }), [searchQuery, selectedCategory, locationFilter, dateFrom, dateTo])
+  }), [searchQuery, selectedCategory, locationFilter, selectedSchool, dateFrom, dateTo])
 
   // Fetch filtered events
   const { data: events, isLoading } = useQuery({
@@ -61,12 +79,13 @@ function EventsContent() {
     if (searchQuery) params.set('search', searchQuery)
     if (selectedCategory !== 'all') params.set('category', selectedCategory)
     if (locationFilter) params.set('location', locationFilter)
+    if (selectedSchool !== 'all') params.set('school', selectedSchool)
     if (dateFrom) params.set('dateFrom', dateFrom)
     if (dateTo) params.set('dateTo', dateTo)
     
     const newUrl = params.toString() ? `/events?${params.toString()}` : '/events'
     router.replace(newUrl, { scroll: false })
-  }, [searchQuery, selectedCategory, locationFilter, dateFrom, dateTo, router])
+  }, [searchQuery, selectedCategory, locationFilter, selectedSchool, dateFrom, dateTo, router])
 
   // Transform events for EventCard
   const transformedEvents = useMemo(() => {
@@ -103,11 +122,12 @@ function EventsContent() {
     setSearchQuery('')
     setSelectedCategory('all')
     setLocationFilter('')
+    setSelectedSchool('all')
     setDateFrom('')
     setDateTo('')
   }
 
-  const hasActiveFilters = selectedCategory !== 'all' || locationFilter || dateFrom || dateTo || searchQuery
+  const hasActiveFilters = selectedCategory !== 'all' || locationFilter || selectedSchool !== 'all' || dateFrom || dateTo || searchQuery
 
   return (
     <div className="min-h-screen flex flex-col bg-background mt-20">
@@ -177,11 +197,11 @@ function EventsContent() {
                 >
                   <Filter className="w-4 h-4" />
                   <span className="hidden sm:inline">Filters</span>
-                  {hasActiveFilters && (
-                    <Badge className="ml-1 px-1.5 py-0.5 bg-primary text-primary-foreground text-xs">
-                      {[selectedCategory !== 'all' ? 1 : 0, locationFilter ? 1 : 0, dateFrom || dateTo ? 1 : 0].reduce((a, b) => a + b, 0)}
-                    </Badge>
-                  )}
+              {hasActiveFilters && (
+                <Badge className="ml-1 px-1.5 py-0.5 bg-primary text-primary-foreground text-xs">
+                  {[selectedCategory !== 'all' ? 1 : 0, selectedSchool !== 'all' ? 1 : 0, locationFilter ? 1 : 0, dateFrom || dateTo ? 1 : 0].reduce((a, b) => a + b, 0)}
+                </Badge>
+              )}
                 </Button>
                 {hasActiveFilters && (
                   <Button
@@ -201,6 +221,70 @@ function EventsContent() {
             {showFilters && (
               <div className="border-t border-border pt-4 mt-4 space-y-4 animate-in slide-in-from-top-2">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {/* School Filter */}
+                  <div>
+                    <Label htmlFor="school" className="mb-2 block text-sm font-medium">School</Label>
+                    <Popover open={schoolOpen} onOpenChange={setSchoolOpen}>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          role="combobox"
+                          aria-expanded={schoolOpen}
+                          className={cn(
+                            "w-full justify-between",
+                            !selectedSchool || selectedSchool === 'all' && "text-muted-foreground"
+                          )}
+                        >
+                          {selectedSchool === 'all' ? 'All Schools' : selectedSchool}
+                          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
+                        <Command>
+                          <CommandInput placeholder="Search school..." />
+                          <CommandList>
+                            <CommandEmpty>No school found.</CommandEmpty>
+                            <CommandGroup>
+                              <CommandItem
+                                value="all"
+                                onSelect={() => {
+                                  setSelectedSchool('all')
+                                  setSchoolOpen(false)
+                                }}
+                              >
+                                <Check
+                                  className={cn(
+                                    "mr-2 h-4 w-4",
+                                    selectedSchool === 'all' ? "opacity-100" : "opacity-0"
+                                  )}
+                                />
+                                All Schools
+                              </CommandItem>
+                              {nigerianSchools.map((school) => (
+                                <CommandItem
+                                  key={school}
+                                  value={school}
+                                  onSelect={() => {
+                                    setSelectedSchool(school)
+                                    setSchoolOpen(false)
+                                  }}
+                                >
+                                  <Check
+                                    className={cn(
+                                      "mr-2 h-4 w-4",
+                                      selectedSchool === school ? "opacity-100" : "opacity-0"
+                                    )}
+                                  />
+                                  {school}
+                                </CommandItem>
+                              ))}
+                            </CommandGroup>
+                          </CommandList>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+
                   {/* Location Filter */}
                   <div>
                     <Label htmlFor="location" className="mb-2 block text-sm font-medium">Location</Label>
@@ -259,6 +343,17 @@ function EventsContent() {
                   Category: {categories.find(c => c.value === selectedCategory)?.label}
                   <button
                     onClick={() => setSelectedCategory('all')}
+                    className="ml-1 hover:text-destructive"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </Badge>
+              )}
+              {selectedSchool !== 'all' && (
+                <Badge variant="secondary" className="gap-1.5">
+                  School: {selectedSchool}
+                  <button
+                    onClick={() => setSelectedSchool('all')}
                     className="ml-1 hover:text-destructive"
                   >
                     <X className="w-3 h-3" />

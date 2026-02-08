@@ -447,3 +447,108 @@ export const updateUserProfile = async (userId: string, profileData: {
   return data
 }
 
+// Admin mutations
+export const adminDeleteEvent = async (eventId: string) => {
+  // Get the event first
+  const { data: event, error: fetchError } = await supabase
+    .from('events')
+    .select('*')
+    .eq('id', eventId)
+    .single()
+
+  if (fetchError) throw fetchError
+  if (!event) throw new Error('Event not found')
+
+  // Insert into deleted_events table
+  const { error: deleteError } = await supabase
+    .from('deleted_events')
+    .insert({
+      original_event_id: event.id,
+      creator_id: event.creator_id,
+      title: event.title,
+      description: event.description,
+      category: event.category,
+      image_url: event.image_url,
+      date: event.date,
+      location: event.location,
+      is_featured: event.is_featured,
+      status: 'cancelled',
+      deleted_by: event.creator_id, // Admin deleted
+      created_at: event.created_at,
+      updated_at: event.updated_at,
+    })
+
+  if (deleteError) throw deleteError
+
+  // Hard delete the event (admin bypasses creator check)
+  const { error: removeError } = await supabase
+    .from('events')
+    .delete()
+    .eq('id', eventId)
+
+  if (removeError) throw removeError
+
+  return { success: true }
+}
+
+export const adminUpdateUserRole = async (userId: string, role: 'user' | 'creator' | 'admin') => {
+  const { data, error } = await supabase
+    .from('users')
+    .update({
+      role,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', userId)
+    .select()
+    .single()
+
+  if (error) throw error
+
+  // If role is creator, ensure creator profile exists
+  if (role === 'creator') {
+    const { data: existingProfile } = await supabase
+      .from('creator_profiles')
+      .select('id')
+      .eq('user_id', userId)
+      .maybeSingle()
+
+    if (!existingProfile) {
+      await supabase
+        .from('creator_profiles')
+        .insert({ user_id: userId })
+    }
+  }
+
+  return data
+}
+
+export const adminBanUser = async (userId: string, banned: boolean) => {
+  const { data, error } = await supabase
+    .from('users')
+    .update({
+      banned,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', userId)
+    .select()
+    .single()
+
+  if (error) throw error
+  return data
+}
+
+export const adminUpdateEventStatus = async (eventId: string, status: 'draft' | 'active' | 'completed' | 'cancelled') => {
+  const { data, error } = await supabase
+    .from('events')
+    .update({
+      status,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', eventId)
+    .select()
+    .single()
+
+  if (error) throw error
+  return data
+}
+
