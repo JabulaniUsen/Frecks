@@ -39,14 +39,14 @@ const HeroSection = () => {
       <div className="container mx-auto px-4 relative z-10">
         <div className="max-w-4xl mx-auto text-center">
           {/* Main Heading */}
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold mb-6 leading-tight">
+          <h1 className="text-2xl md:text-4xl lg:text-5xl font-extrabold mb-6 leading-tight">
             Discover the{" "}
             <span className="text-primary">Best Events</span>
             <br />
             on Campus
           </h1>
 
-          <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+          <p className="text-sm md:text-base text-muted-foreground mb-8 max-w-2xl mx-auto">
             Find concerts, parties, sports games, and more. Get your tickets in seconds and never miss out on the fun! 🎉
           </p>
 
