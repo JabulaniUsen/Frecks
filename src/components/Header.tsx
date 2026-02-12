@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Menu, X, Ticket, Search, User, LogOut } from "lucide-react";
@@ -45,10 +46,15 @@ const Header = () => {
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 group">
-            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center group-hover:scale-110 transition-transform">
-              <Ticket className="w-5 h-5 text-primary-foreground" />
+            <div className="relative w-32 h-12 group-hover:scale-105 transition-transform">
+              <Image
+                src="/logo.png"
+                alt="Frecks Live"
+                fill
+                className="object-contain"
+                priority
+              />
             </div>
-            <span className="text-xl font-bold text-primary">Frecks</span>
           </Link>
 
           {/* Desktop Navigation */}

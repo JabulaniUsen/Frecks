@@ -17,12 +17,6 @@
       "static/chunks/main-app.js",
       "static/chunks/app/not-found.js"
     ],
-    "/auth/signup/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/css/app/auth/signup/page.css",
-      "static/chunks/app/auth/signup/page.js"
-    ],
     "/auth/signin/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
@@ -34,21 +28,16 @@
       "static/chunks/main-app.js",
       "static/chunks/app/dashboard/page.js"
     ],
-    "/dashboard/creator/page": [
+    "/dashboard/user/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/css/app/dashboard/creator/page.css",
-      "static/chunks/app/dashboard/creator/page.js"
+      "static/css/app/dashboard/user/page.css",
+      "static/chunks/app/dashboard/user/page.js"
     ],
-    "/dashboard/creator/analytics/[id]/page": [
+    "/_not-found/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/dashboard/creator/analytics/[id]/page.js"
-    ],
-    "/admin/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/admin/page.js"
+      "static/chunks/app/_not-found/page.js"
     ]
   }
 }

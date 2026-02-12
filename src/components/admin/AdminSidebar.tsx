@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Image from 'next/image'
 import { cn } from '@/lib/utils'
 import {
   LayoutDashboard,
@@ -68,11 +69,14 @@ export default function AdminSidebar({ activeTab, onTabChange }: AdminSidebarPro
         <div className="flex h-full flex-col">
           {/* Logo/Branding */}
           <div className="flex h-16 items-center border-b border-border px-6">
-            <div className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-                <span className="text-sm font-bold text-primary-foreground">A</span>
-              </div>
-              <span className="text-lg font-bold">Admin Panel</span>
+            <div className="relative w-40 h-12">
+              <Image
+                src="/logo.png"
+                alt="Frecks Live Admin"
+                fill
+                className="object-contain object-left"
+                priority
+              />
             </div>
           </div>
 

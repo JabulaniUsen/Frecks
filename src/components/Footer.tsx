@@ -1,3 +1,5 @@
+import Link from "next/link";
+import Image from "next/image";
 import { Ticket, Instagram, Twitter, Facebook, Youtube } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -43,12 +45,14 @@ const Footer = ({ showNewsletter = false }: FooterProps) => {
         <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
           {/* Brand */}
           <div className="col-span-2">
-            <a href="/" className="flex items-center gap-2 mb-4">
-              <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
-                <Ticket className="w-5 h-5 text-primary-foreground" />
-              </div>
-              <span className="text-xl font-bold text-primary">Frecks</span>
-            </a>
+            <Link href="/" className="flex items-center gap-2 mb-4 relative w-32 h-12">
+              <Image
+                src="/logo.png"
+                alt="Frecks"
+                fill
+                className="object-contain object-left"
+              />
+            </Link>
             <p className="text-muted-foreground mb-6 max-w-xs">
               Your go-to platform for discovering and booking campus events. Made by students, for students.
             </p>

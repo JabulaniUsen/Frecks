@@ -1,7 +1,8 @@
 {
   "/auth/signin/page": "app/auth/signin/page.js",
-  "/dashboard/creator/analytics/[id]/page": "app/dashboard/creator/analytics/[id]/page.js",
-  "/admin/page": "app/admin/page.js",
-  "/auth/signup/page": "app/auth/signup/page.js",
-  "/dashboard/creator/page": "app/dashboard/creator/page.js"
+  "/_not-found/page": "app/_not-found/page.js",
+  "/dashboard/page": "app/dashboard/page.js",
+  "/dashboard/user/page": "app/dashboard/user/page.js",
+  "/icon.svg/route": "app/icon.svg/route.js",
+  "/page": "app/page.js"
 }
