@@ -722,14 +722,12 @@ const Settings = () => {
                 maxLength={10}
                 inputMode="numeric"
                 pattern="[0-9]*"
-                {...register('bank_account_number', {
-                  onChange: (e) => {
-                    // Only allow numbers
-                    const value = e.target.value.replace(/\D/g, '');
-                    e.target.value = value;
-                    register('bank_account_number').onChange(e);
-                  }
-                })}
+                {...register('bank_account_number')}
+                onChange={(e) => {
+                  // Only allow numbers
+                  const value = e.target.value.replace(/\D/g, '');
+                  setValue('bank_account_number', value);
+                }}
                 className="flex-1"
               />
               <Button

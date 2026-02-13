@@ -135,10 +135,10 @@ export default function EventDetailPage() {
       });
 
       // Update QR codes with actual ticket IDs and order ID, and upload to storage
-      if (order.id && user?.id) {
+      if (order.id) {
         const { data: tickets } = await supabase
           .from('tickets')
-          .select('id, ticket_type_id')
+          .select('id, ticket_type_id, user_id')
           .eq('order_id', order.id)
           .order('created_at', { ascending: true });
 
@@ -159,14 +159,17 @@ export default function EventDetailPage() {
               validationUrl: validationUrl,
             };
 
+            // Use ticket's user_id (which could be from logged-in user or null for guests)
+            const ticketUserId = ticket.user_id || 'guest';
+            
             // Generate and upload QR code to storage bucket
-            const qrCodeImageUrl = await generateAndUploadQRCode(updatedQRData, user.id);
+            const qrCodeImageUrl = await generateAndUploadQRCode(updatedQRData, ticketUserId);
 
             // Update ticket with QR code URL from storage and validation URL
             await supabase
               .from('tickets')
               .update({
-                qr_code: validationUrl, // Store validation URL as qr_code
+                qr_code: ticket.id, // Store ticket ID as qr_code for easy lookup
                 qr_code_data: {
                   ...updatedQRData,
                   qrCodeImageUrl: qrCodeImageUrl, // Store storage URL

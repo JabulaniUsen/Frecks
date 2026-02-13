@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect, Suspense } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -38,6 +39,7 @@ import {
   Loader2,
   Menu,
   X,
+  Wallet,
 } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
 import { useAuth } from "@/contexts/AuthContext";
@@ -49,13 +51,14 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import MyEvents from "@/components/creator/MyEvents";
 import Tickets from "@/components/creator/Tickets";
 import SettingsPage from "@/components/creator/Settings";
+import Withdraw from "@/components/creator/Withdraw";
 
 function CreatorDashboardContent() {
   // All hooks must be called unconditionally and in the same order every render
   const { profile, loading: authLoading, user } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [activeView, setActiveView] = useState<'dashboard' | 'events' | 'past-events' | 'tickets' | 'my-tickets' | 'settings'>('dashboard');
+  const [activeView, setActiveView] = useState<'dashboard' | 'events' | 'past-events' | 'tickets' | 'my-tickets' | 'withdraw' | 'settings'>('dashboard');
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -102,6 +105,12 @@ function CreatorDashboardContent() {
       });
       // Clean up URL
       router.replace('/dashboard/creator');
+    }
+    
+    // Check for tab parameter to switch views
+    const tab = searchParams.get('tab');
+    if (tab === 'withdraw') {
+      setActiveView('withdraw');
     }
   }, [searchParams, router]);
 
@@ -214,10 +223,7 @@ function CreatorDashboardContent() {
       }`}>
         <div className="p-4 border-b border-border flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2" onClick={() => setMobileMenuOpen(false)}>
-            <div className="w-8 h-8 rounded-xl bg-primary flex items-center justify-center">
-              <Ticket className="w-4 h-4 text-primary-foreground" />
-            </div>
-            <span className="text-lg font-bold text-primary">Frecks</span>
+            <Image src="/logo.png" alt="Frecks" width={120} height={40} className="h-8 w-auto" />
           </Link>
           <button
             onClick={() => setMobileMenuOpen(false)}
@@ -285,6 +291,20 @@ function CreatorDashboardContent() {
           </button>
           <button
             onClick={() => {
+              setActiveView('withdraw')
+              setMobileMenuOpen(false)
+            }}
+            className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors ${
+              activeView === 'withdraw'
+                ? 'bg-primary text-primary-foreground font-medium'
+                : 'text-muted-foreground hover:bg-muted'
+            }`}
+          >
+            <Wallet className="w-4 h-4" />
+            Withdraw
+          </button>
+          <button
+            onClick={() => {
               setActiveView('settings')
               setMobileMenuOpen(false)
             }}
@@ -316,10 +336,7 @@ function CreatorDashboardContent() {
       <aside className="hidden lg:flex flex-col w-64 bg-card border-r border-border">
         <div className="p-6 border-b border-border">
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
-              <Ticket className="w-5 h-5 text-primary-foreground" />
-            </div>
-            <span className="text-xl font-bold text-primary">Frecks</span>
+            <Image src="/logo.png" alt="Frecks" width={140} height={48} className="h-10 w-auto" />
           </Link>
         </div>
         <nav className="flex-1 p-4 space-y-2">
@@ -377,6 +394,17 @@ function CreatorDashboardContent() {
           >
             <TicketCheck className="w-5 h-5" />
             My Tickets
+          </button>
+          <button
+            onClick={() => setActiveView('withdraw')}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${
+              activeView === 'withdraw'
+                ? 'bg-primary text-primary-foreground font-medium'
+                : 'text-muted-foreground hover:bg-muted'
+            }`}
+          >
+            <Wallet className="w-5 h-5" />
+            Withdraw
           </button>
           <button
             onClick={() => setActiveView('settings')}
@@ -640,7 +668,7 @@ function CreatorDashboardContent() {
           </div>
 
           {/* Quick Actions */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 md:gap-4">
+          <div className="grid grid-cols-1 gap-2 md:gap-4">
             <Link href="/dashboard/creator/create">
               <button className="p-3 md:p-6 bg-primary text-primary-foreground rounded-lg md:rounded-2xl text-left hover:brightness-110 transition-all w-full">
                 <Plus className="w-5 h-5 md:w-8 md:h-8 mb-2 md:mb-4" />
@@ -648,16 +676,6 @@ function CreatorDashboardContent() {
                 <p className="text-xs md:text-sm opacity-80">Start organizing your next event</p>
               </button>
             </Link>
-            <button className="p-3 md:p-6 bg-card border border-border rounded-lg md:rounded-2xl text-left hover:shadow-card-hover transition-all">
-              <Users className="w-5 h-5 md:w-8 md:h-8 mb-2 md:mb-4 text-primary" />
-              <h3 className="font-bold text-sm md:text-lg mb-0.5 md:mb-1">View Attendees</h3>
-              <p className="text-xs md:text-sm text-muted-foreground">Manage your guest lists</p>
-            </button>
-            <button className="p-3 md:p-6 bg-card border border-border rounded-lg md:rounded-2xl text-left hover:shadow-card-hover transition-all">
-              <BarChart3 className="w-5 h-5 md:w-8 md:h-8 mb-2 md:mb-4 text-primary" />
-              <h3 className="font-bold text-sm md:text-lg mb-0.5 md:mb-1">Analytics</h3>
-              <p className="text-xs md:text-sm text-muted-foreground">View detailed reports</p>
-            </button>
           </div>
         </div>
         )}
@@ -856,6 +874,9 @@ function CreatorDashboardContent() {
             )}
           </div>
         )}
+        <div style={{ display: activeView === 'withdraw' ? 'block' : 'none' }}>
+          <Withdraw />
+        </div>
         <div style={{ display: activeView === 'settings' ? 'block' : 'none' }}>
           <SettingsPage />
         </div>

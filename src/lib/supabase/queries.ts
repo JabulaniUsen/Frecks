@@ -264,6 +264,39 @@ export const getWalletTransactions = async (creatorId: string) => {
   return data
 }
 
+// Withdrawal queries
+export const getCreatorWithdrawals = async (creatorId: string) => {
+  const { data, error } = await supabase
+    .from('withdrawals')
+    .select('*')
+    .eq('creator_id', creatorId)
+    .order('created_at', { ascending: false })
+
+  if (error) throw error
+  return data || []
+}
+
+export const getAllWithdrawals = async () => {
+  const { data, error } = await supabase
+    .from('withdrawals')
+    .select('*, creator:users!withdrawals_creator_id_fkey(id, email, full_name, school)')
+    .order('created_at', { ascending: false })
+
+  if (error) throw error
+  return data || []
+}
+
+export const getCreatorBalance = async (creatorId: string) => {
+  const { data, error } = await supabase
+    .from('creator_profiles')
+    .select('account_balance, bank_account_name, bank_account_number, bank_name, bank_code, is_bank_verified')
+    .eq('user_id', creatorId)
+    .single()
+
+  if (error) throw error
+  return data
+}
+
 // Admin queries
 export const getAllEvents = async () => {
   const { data, error } = await supabase

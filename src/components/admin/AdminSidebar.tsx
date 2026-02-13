@@ -15,6 +15,7 @@ import {
   Search,
   Menu,
   X,
+  Wallet,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -33,6 +34,7 @@ const sidebarItems: SidebarItem[] = [
   { title: 'Organizers', value: 'organizers', icon: UserCheck },
   { title: 'Orders', value: 'orders', icon: ShoppingCart },
   { title: 'Tickets', value: 'tickets', icon: Ticket },
+  { title: 'Withdrawals', value: 'withdrawals', icon: Wallet },
   { title: 'Ads', value: 'ads', icon: Megaphone },
 ]
 

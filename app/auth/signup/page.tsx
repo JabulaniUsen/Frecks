@@ -44,20 +44,20 @@ type SignUpFormData = z.infer<typeof signUpSchema>
 
 export default function SignUpPage() {
   const router = useRouter()
-  const { user } = useAuth()
+  const { user, profile, loading: authLoading } = useAuth()
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [schoolOpen, setSchoolOpen] = useState(false)
   const [customSchool, setCustomSchool] = useState('')
   const [showPassword, setShowPassword] = useState(false)
 
-  // Redirect if already authenticated
+  // Redirect if already authenticated (wait for profile to load)
   useEffect(() => {
-    if (user) {
+    if (!authLoading && user && profile) {
       const redirectUrl = new URLSearchParams(window.location.search).get('redirect') || '/dashboard'
       router.replace(redirectUrl)
     }
-  }, [user, router])
+  }, [user, profile, authLoading, router])
 
   const {
     register,
@@ -140,9 +140,9 @@ export default function SignUpPage() {
       }
 
       // AuthContext will automatically fetch profile via onAuthStateChange
-      // Navigate to redirect URL or dashboard
-      const redirectUrl = new URLSearchParams(window.location.search).get('redirect') || '/dashboard'
-      router.push(redirectUrl)
+      // Don't redirect here - let the useEffect handle it once profile is loaded
+      // This prevents redirect loops and ensures profile is available
+      setLoading(false)
     } catch (err: any) {
       setError(err.message || 'Failed to sign up')
       setLoading(false)

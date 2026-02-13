@@ -552,3 +552,145 @@ export const adminUpdateEventStatus = async (eventId: string, status: 'draft' | 
   return data
 }
 
+// Withdrawal mutations
+export const createWithdrawal = async (
+  creatorId: string,
+  amount: number,
+  bankDetails: {
+    bank_account_name: string
+    bank_account_number: string
+    bank_name: string
+    bank_code: string
+  }
+) => {
+  // Check if creator has sufficient balance
+  const { data: creatorProfile, error: profileError } = await supabase
+    .from('creator_profiles')
+    .select('account_balance')
+    .eq('user_id', creatorId)
+    .single()
+
+  if (profileError) throw profileError
+  if (!creatorProfile) throw new Error('Creator profile not found')
+
+  const currentBalance = Number(creatorProfile.account_balance) || 0
+  if (currentBalance < amount) {
+    throw new Error(`Insufficient balance. Available: ₦${currentBalance.toLocaleString()}`)
+  }
+
+  // Create withdrawal request
+  const { data: withdrawal, error: withdrawalError } = await supabase
+    .from('withdrawals')
+    .insert({
+      creator_id: creatorId,
+      amount,
+      status: 'pending',
+      ...bankDetails,
+    })
+    .select()
+    .single()
+
+  if (withdrawalError) throw withdrawalError
+
+  // Deduct amount from account balance
+  const { error: updateError } = await supabase
+    .from('creator_profiles')
+    .update({
+      account_balance: currentBalance - amount,
+    })
+    .eq('user_id', creatorId)
+
+  if (updateError) throw updateError
+
+  // Create wallet transaction record
+  await supabase.from('wallet_transactions').insert({
+    creator_id: creatorId,
+    type: 'withdrawal',
+    amount: -amount,
+    status: 'pending',
+    description: `Withdrawal request - ${bankDetails.bank_name} ${bankDetails.bank_account_number}`,
+  })
+
+  return withdrawal
+}
+
+export const approveWithdrawal = async (withdrawalId: string, adminId: string, adminNote?: string) => {
+  const { data: withdrawal, error } = await supabase
+    .from('withdrawals')
+    .update({
+      status: 'approved',
+      approved_by: adminId,
+      approved_at: new Date().toISOString(),
+      admin_note: adminNote,
+    })
+    .eq('id', withdrawalId)
+    .select()
+    .single()
+
+  if (error) throw error
+
+  // Update wallet transaction status
+  await supabase
+    .from('wallet_transactions')
+    .update({ status: 'completed' })
+    .eq('creator_id', withdrawal.creator_id)
+    .eq('amount', -withdrawal.amount)
+    .eq('type', 'withdrawal')
+    .eq('status', 'pending')
+
+  return withdrawal
+}
+
+export const rejectWithdrawal = async (withdrawalId: string, adminId: string, adminNote: string) => {
+  // Get withdrawal details
+  const { data: withdrawal, error: fetchError } = await supabase
+    .from('withdrawals')
+    .select('*')
+    .eq('id', withdrawalId)
+    .single()
+
+  if (fetchError) throw fetchError
+  if (!withdrawal) throw new Error('Withdrawal not found')
+
+  // Update withdrawal status
+  const { error: updateError } = await supabase
+    .from('withdrawals')
+    .update({
+      status: 'rejected',
+      approved_by: adminId,
+      rejected_at: new Date().toISOString(),
+      admin_note: adminNote,
+    })
+    .eq('id', withdrawalId)
+
+  if (updateError) throw updateError
+
+  // Refund amount to creator's balance
+  const { data: creatorProfile } = await supabase
+    .from('creator_profiles')
+    .select('account_balance')
+    .eq('user_id', withdrawal.creator_id)
+    .single()
+
+  if (creatorProfile) {
+    const currentBalance = Number(creatorProfile.account_balance) || 0
+    await supabase
+      .from('creator_profiles')
+      .update({
+        account_balance: currentBalance + Number(withdrawal.amount),
+      })
+      .eq('user_id', withdrawal.creator_id)
+  }
+
+  // Update wallet transaction status
+  await supabase
+    .from('wallet_transactions')
+    .update({ status: 'failed' })
+    .eq('creator_id', withdrawal.creator_id)
+    .eq('amount', -withdrawal.amount)
+    .eq('type', 'withdrawal')
+    .eq('status', 'pending')
+
+  return withdrawal
+}
+

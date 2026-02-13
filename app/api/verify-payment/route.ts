@@ -153,6 +153,49 @@ export async function POST(request: NextRequest) {
         }
       }
 
+      // Credit creator's account balance
+      const { data: event } = await supabase
+        .from('events')
+        .select('creator_id')
+        .eq('id', order.event_id)
+        .single()
+
+      if (event) {
+        const SERVICE_CHARGE = 200
+        const orderAmount = parseFloat(order.total_amount)
+        const creatorEarnings = Math.max(0, orderAmount - SERVICE_CHARGE)
+        
+        // Get current balance
+        const { data: creatorProfile } = await supabase
+          .from('creator_profiles')
+          .select('account_balance')
+          .eq('user_id', event.creator_id)
+          .single()
+
+        const currentBalance = parseFloat(creatorProfile?.account_balance || '0')
+        
+        // Update creator's account balance (excluding service charge)
+        await supabase
+          .from('creator_profiles')
+          .upsert({
+            user_id: event.creator_id,
+            account_balance: currentBalance + creatorEarnings,
+          })
+
+        // Create wallet transaction record
+        await supabase
+          .from('wallet_transactions')
+          .insert({
+            creator_id: event.creator_id,
+            event_id: order.event_id,
+            order_id: orderId,
+            type: 'earning',
+            amount: creatorEarnings,
+            status: 'completed',
+            description: `Ticket sales - Order #${orderId.slice(0, 8)}`,
+          })
+      }
+
       // Send ticket email (don't wait for it, fire and forget)
       try {
         const { data: eventData } = await supabase

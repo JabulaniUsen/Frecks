@@ -16,6 +16,7 @@ import AdminStatsCards from '@/components/admin/AdminStatsCards'
 import AdminCharts from '@/components/admin/AdminCharts'
 import AdminTables from '@/components/admin/AdminTables'
 import AdminSidebar from '@/components/admin/AdminSidebar'
+import WithdrawalsTable from '@/components/admin/WithdrawalsTable'
 import { Loader2, Download, FileText } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -273,6 +274,14 @@ export default function AdminDashboard() {
                 onRefresh={handleRefresh}
                 activeView="tickets"
               />
+            </TabsContent>
+
+            {/* Withdrawals Tab */}
+            <TabsContent value="withdrawals">
+              <div>
+                <h2 className="text-xl font-semibold mb-4">Withdrawal Requests</h2>
+                <WithdrawalsTable />
+              </div>
             </TabsContent>
 
             {/* Ads Tab */}
