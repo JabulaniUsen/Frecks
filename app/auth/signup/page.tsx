@@ -47,6 +47,8 @@ export default function SignUpPage() {
   const { user, profile, loading: authLoading } = useAuth()
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [success, setSuccess] = useState(false)
+  const [userEmail, setUserEmail] = useState('')
   const [schoolOpen, setSchoolOpen] = useState(false)
   const [customSchool, setCustomSchool] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -139,10 +141,17 @@ export default function SignUpPage() {
         // Don't fail signup if email fails
       }
 
-      // AuthContext will automatically fetch profile via onAuthStateChange
-      // Don't redirect here - let the useEffect handle it once profile is loaded
-      // This prevents redirect loops and ensures profile is available
+      // Show success message
+      setSuccess(true)
+      setUserEmail(data.email)
       setLoading(false)
+      
+      // AuthContext will automatically fetch profile via onAuthStateChange
+      // Redirect after 3 seconds to allow user to see the message
+      setTimeout(() => {
+        const redirectUrl = new URLSearchParams(window.location.search).get('redirect') || '/dashboard'
+        router.replace(redirectUrl)
+      }, 3000)
     } catch (err: any) {
       setError(err.message || 'Failed to sign up')
       setLoading(false)
@@ -161,6 +170,22 @@ export default function SignUpPage() {
             {error && (
               <div className="mb-4 p-3 bg-destructive/10 text-destructive rounded-lg text-sm">
                 {error}
+              </div>
+            )}
+
+            {success && (
+              <div className="mb-4 p-4 bg-primary/10 border border-primary/20 text-foreground rounded-lg">
+                <div className="flex items-start gap-3">
+                  <div className="flex-shrink-0 w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center">
+                    <span className="text-xl">📧</span>
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-sm mb-1">Check your email inbox!</h3>
+                    <p className="text-sm text-muted-foreground">
+                      We've sent a confirmation email to <span className="font-medium text-foreground">{userEmail}</span>. Please check your inbox to confirm your email address.
+                    </p>
+                  </div>
+                </div>
               </div>
             )}
 

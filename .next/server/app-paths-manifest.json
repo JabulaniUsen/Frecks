@@ -1,24 +1,4 @@
 {
-  "/_not-found/page": "app/_not-found/page.js",
-  "/admin/page": "app/admin/page.js",
-  "/api/get-banks/route": "app/api/get-banks/route.js",
-  "/api/verify-bank-account/route": "app/api/verify-bank-account/route.js",
   "/auth/signup/page": "app/auth/signup/page.js",
-  "/api/verify-payment/route": "app/api/verify-payment/route.js",
-  "/dashboard/creator/analytics/[id]/page": "app/dashboard/creator/analytics/[id]/page.js",
-  "/auth/signin/page": "app/auth/signin/page.js",
-  "/dashboard/page": "app/dashboard/page.js",
-  "/dashboard/creator/create/page": "app/dashboard/creator/create/page.js",
-  "/dashboard/creator/edit/[id]/page": "app/dashboard/creator/edit/[id]/page.js",
-  "/dashboard/creator/page": "app/dashboard/creator/page.js",
-  "/dashboard/user/page": "app/dashboard/user/page.js",
-  "/events/page": "app/events/page.js",
-  "/event/[id]/page": "app/event/[id]/page.js",
-  "/page": "app/page.js",
-  "/ticket/[id]/page": "app/ticket/[id]/page.js",
-  "/invoice/[id]/page": "app/invoice/[id]/page.js",
-  "/icon.svg/route": "app/icon.svg/route.js",
-  "/tickets/[id]/page": "app/tickets/[id]/page.js",
-  "/transactions/page": "app/transactions/page.js",
-  "/api/send-email/route": "app/api/send-email/route.js"
+  "/auth/signin/page": "app/auth/signin/page.js"
 }
